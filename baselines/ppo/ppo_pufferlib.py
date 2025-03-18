@@ -280,6 +280,7 @@ def run(
         else config.environment.k_unique_scenes,
         sample_with_replacement=config.train.sample_with_replacement,
         shuffle=config.train.shuffle_dataset,
+        file_prefix=config.file_prefix
     )
 
     # Make environment

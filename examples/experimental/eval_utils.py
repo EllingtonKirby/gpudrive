@@ -11,8 +11,8 @@ from gpudrive.env.env_torch import GPUDriveTorchEnv
 from gpudrive.env.dataset import SceneDataLoader
 from gpudrive.visualize.utils import img_from_fig
 from gpudrive.datatypes.observation import GlobalEgoState
-
 from gpudrive.networks.late_fusion import NeuralNet
+from gpudrive.datatypes.metadata import Metadata
 
 import logging
 import torch
@@ -42,7 +42,8 @@ def load_policy(path_to_cpt, model_name, device, env=None):
     # Load the saved checkpoint
     if model_name == "random_baseline":
         return RandomPolicy(env.action_space.n)
-
+    elif model_name == "huggingface":
+        return NeuralNet.from_pretrained(path_to_cpt).to(device).eval()
     else:  # Load a trained model
         saved_cpt = torch.load(
             f=f"{path_to_cpt}/{model_name}.pt",
@@ -76,6 +77,7 @@ def rollout(
     zoom_radius: int = 100,
     return_agent_positions: bool = False,
     center_on_ego: bool = False,
+    rollout_only_ego = False,
 ):
     """
     Perform a rollout of a policy in the environment.
@@ -108,8 +110,15 @@ def rollout(
     active_worlds = np.arange(num_worlds).tolist()
     episode_lengths = torch.zeros(num_worlds)
     
-    control_mask = env.cont_agent_mask
+    if not rollout_only_ego:
+        control_mask = env.cont_agent_mask
+    else:
+        control_mask = torch.zeros_like(env.cont_agent_mask)
+        sdc_mask = Metadata.from_tensor(env.sim.metadata_tensor(), backend="torch").isSdc.argmax(dim=1)
+        control_mask[torch.arange(len(sdc_mask)), sdc_mask] = True
+
     live_agent_mask = control_mask.clone()
+    expert_actions, _, _, _ = env.get_expert_actions()
 
     for time_step in range(episode_len):
         
@@ -128,7 +137,12 @@ def rollout(
             action_template[live_agent_mask] = action.to(device)
 
             # Step the environment
-            env.step_dynamics(action_template)
+            if not rollout_only_ego:
+                env.step_dynamics(action_template)
+            else:
+                action_values = env.action_keys_tensor[action_template]
+                action_values[~live_agent_mask] = expert_actions[:, :, time_step, :][~live_agent_mask]
+                env.step_dynamics(action_template)
 
             # Render
             if render_sim_state and len(active_worlds) > 0:
@@ -288,6 +302,9 @@ def evaluate_policy(
     device="cuda",
     deterministic=False,
     render_sim_state=False,
+    return_agent_positions=False,
+    rollout_only_ego=False,
+    zoom_radius=100,
 ):
     """Evaluate policy in the environment."""
 
@@ -303,6 +320,7 @@ def evaluate_policy(
         "other_frac": [],
         "controlled_agents_in_scene": [],
         "episode_lengths": [],
+        "agent_positions": [],
     }
 
     for batch in tqdm(
@@ -335,6 +353,9 @@ def evaluate_policy(
             device=device,
             deterministic=deterministic,
             render_sim_state=render_sim_state,
+            return_agent_positions=return_agent_positions,
+            rollout_only_ego=rollout_only_ego,
+            zoom_radius=zoom_radius
         )
 
         # Get names from env
@@ -356,6 +377,7 @@ def evaluate_policy(
             controlled_agents_in_scene.cpu().numpy()
         )
         res_dict["episode_lengths"].extend(episode_lengths.cpu().numpy())
+        res_dict["agent_positions"].extend(agent_positions.cpu().numpy())
 
     # Convert to pandas dataframe
     df_res = pd.DataFrame(res_dict)

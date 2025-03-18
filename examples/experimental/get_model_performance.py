@@ -23,6 +23,13 @@ def set_seed(seed: int):
     torch.cuda.manual_seed_all(seed)  # If using CUDA
     torch.backends.cudnn.deterministic = True
 
+def save_videos(frames):
+    import mediapy
+    for key, frame_list in frames.items():
+        mediapy.write_video(f"../../assets/{model.name}_{key}.gif", frame_list, fps=5, codec='gif')
+
+    print(f"Videos saved")
+
 logging.basicConfig(level=logging.INFO)
 SEED = 42  # Set to any fixed value
 set_seed(SEED)
@@ -38,6 +45,7 @@ if __name__ == "__main__":
         batch_size=eval_config.num_worlds,
         dataset_size=eval_config.num_worlds,
         sample_with_replacement=False,
+        file_prefix="nuplan"
     )
 
     # Make environment
@@ -59,9 +67,7 @@ if __name__ == "__main__":
         train_loader = SceneDataLoader(
             root=eval_config.train_dir,
             batch_size=eval_config.num_worlds,
-            dataset_size=model.train_dataset_size
-            if model.name != "random_baseline"
-            else 1000,
+            dataset_size=model.train_dataset_size,
             sample_with_replacement=False,
             shuffle=False,
         )
@@ -69,11 +75,10 @@ if __name__ == "__main__":
         test_loader = SceneDataLoader(
             root=eval_config.test_dir,
             batch_size=eval_config.num_worlds,
-            dataset_size=eval_config.test_dataset_size
-            if model.name != "random_baseline"
-            else 1000,
+            dataset_size=eval_config.test_dataset_size,
             sample_with_replacement=False,
             shuffle=True,
+            file_prefix="nuplan"
         )
 
         # Rollouts
@@ -96,7 +101,8 @@ if __name__ == "__main__":
             data_loader=test_loader,
             dataset_name="test",
             deterministic=False,
-            render_sim_state=False,
+            render_sim_state=True,
+            zoom_radius=150,
         )
 
         # Concatenate train/test results
