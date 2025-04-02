@@ -2,8 +2,7 @@ import torch
 from dataclasses import dataclass
 import madrona_gpudrive
 
-TRAJ_LEN = 91  # Length of the logged trajectory
-
+TRAJ_LEN = 200  # Length of the logged trajectory
 
 @dataclass
 class LogTrajectory:

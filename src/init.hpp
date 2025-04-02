@@ -8,7 +8,7 @@ namespace madrona_gpudrive
     // Constants computed from train files.
     constexpr size_t MAX_OBJECTS = 515;
     constexpr size_t MAX_ROADS = 956;
-    constexpr size_t MAX_POSITIONS = 91;
+    constexpr size_t MAX_POSITIONS = 200;
     constexpr size_t MAX_GEOMETRY = 1746;
 
     // Cannot use Madrona::math::Vector2 because it is not a POD type.
