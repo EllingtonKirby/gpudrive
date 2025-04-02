@@ -1,7 +1,18 @@
-models_path: examples/experimental/models
+models_path: runs
 
 models:
-  - name: model_PPO____R_10000__02_27_09_19_10_626_003200
-    train_dataset_size: 10_000
+  - name: base_nuplan_201_steps____S_100__04_01_15_36_32_807/model_base_nuplan_201_steps____S_100__04_01_15_36_32_807_000799
+    architecture: "NeuralNet"
+    train_dataset_size: 1000
     wandb: null
     trained_on: null
+  - name: feature_aligned_201____S_100__04_01_15_37_58_323/model_feature_aligned_201____S_100__04_01_15_37_58_323_000400
+    architecture: "FeatureAlignedPolicy"
+    train_dataset_size: 1000
+    wandb: null
+    trained_on: null
+  # - name: feature_aligned_IL_reward_201____S_100__04_01_15_40_03_694/model_feature_aligned_IL_reward_201____S_100__04_01_15_40_03_694_000400
+  #   architecture: "FeatureAlignedPolicy"
+  #   train_dataset_size: 0
+  #   wandb: null
+  #   trained_on: null

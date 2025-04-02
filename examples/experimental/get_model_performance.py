@@ -38,6 +38,7 @@ if __name__ == "__main__":
         batch_size=eval_config.num_worlds,
         dataset_size=eval_config.num_worlds,
         sample_with_replacement=False,
+        file_prefix=eval_config.file_prefix,
     )
 
     # Make environment
@@ -53,6 +54,7 @@ if __name__ == "__main__":
             model_name=model.name,
             device=eval_config.device,
             env=env,
+            architecture=model.architecture,
         )
 
         # Create dataloaders for train and test sets
@@ -64,6 +66,7 @@ if __name__ == "__main__":
             else 1000,
             sample_with_replacement=False,
             shuffle=False,
+            file_prefix=eval_config.file_prefix,
         )
 
         test_loader = SceneDataLoader(
@@ -74,6 +77,7 @@ if __name__ == "__main__":
             else 1000,
             sample_with_replacement=False,
             shuffle=True,
+            file_prefix=eval_config.file_prefix,
         )
 
         # Rollouts

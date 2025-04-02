@@ -1,11 +1,12 @@
 res_path: examples/experimental/dataframes # Store dataframes here
-test_dataset_size: 10_000 # Number of test scenarios to evaluate on
+test_dataset_size: 4 # Number of test scenarios to evaluate on
 
 # Environment settings
-train_dir: data/processed/training 
-test_dir: data/processed/validation 
+train_dir: /home/ekirby/scania/datasets_scania/nuplan_mini_gpudrive/201_ts/nuplan/train 
+test_dir: /home/ekirby/scania/datasets_scania/nuplan_mini_gpudrive/201_ts/nuplan/val
+file_prefix: nuplan
 
-num_worlds: 50 # Number of parallel environments for evaluation
+num_worlds: 4 # Number of parallel environments for evaluation
 max_controlled_agents: 64 # Maximum number of agents controlled by the model.
 ego_state: true
 road_map_obs: true

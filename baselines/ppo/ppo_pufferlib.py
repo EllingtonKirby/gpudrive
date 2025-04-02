@@ -20,6 +20,7 @@ from gpudrive.integrations.puffer import ppo
 from gpudrive.env.env_puffer import PufferGPUDrive
 
 from gpudrive.networks.late_fusion import NeuralNet
+from gpudrive.networks.feature_aligned_policy import FeatureAlignedPolicy
 from gpudrive.env.dataset import SceneDataLoader
 
 import pufferlib
@@ -71,13 +72,22 @@ def make_agent(env, config):
 
     else:
         # Start from scratch
-        return NeuralNet(
-            input_dim=config.train.network.input_dim,
-            action_dim=env.single_action_space.n,
-            hidden_dim=config.train.network.hidden_dim,
-            dropout=config.train.network.dropout,
-            config=config.environment,
-        )
+        if config.train.network.class_name == "NeuralNet":
+            return NeuralNet(
+                input_dim=config.train.network.input_dim,
+                action_dim=env.single_action_space.n,
+                hidden_dim=config.train.network.hidden_dim,
+                dropout=config.train.network.dropout,
+                config=config.environment,
+            )
+        elif config.train.network.class_name == "FeatureAlignedPolicy":
+            return FeatureAlignedPolicy(
+                input_dim=config.train.network.input_dim,
+                action_dim=env.single_action_space.n,
+                hidden_dim=config.train.network.hidden_dim,
+                dropout=config.train.network.dropout,
+                config=config.environment,
+            )
 
 
 def train(args, vecenv):

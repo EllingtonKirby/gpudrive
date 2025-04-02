@@ -13,6 +13,7 @@ from gpudrive.visualize.utils import img_from_fig
 from gpudrive.datatypes.observation import GlobalEgoState
 
 from gpudrive.networks.late_fusion import NeuralNet
+from gpudrive.networks.feature_aligned_policy import FeatureAlignedPolicy
 
 import logging
 import torch
@@ -36,7 +37,7 @@ class RandomPolicy:
         return random_action, None, None, None
 
 
-def load_policy(path_to_cpt, model_name, device, env=None):
+def load_policy(path_to_cpt, model_name, device, env=None, architecture=None):
     """Load a policy from a given path."""
 
     # Load the saved checkpoint
@@ -53,11 +54,18 @@ def load_policy(path_to_cpt, model_name, device, env=None):
         logging.info(f"Load model from {path_to_cpt}/{model_name}.pt")
 
         # Create policy architecture from saved checkpoint
-        policy = NeuralNet(
-            input_dim=saved_cpt["model_arch"]["input_dim"],
-            action_dim=saved_cpt["action_dim"],
-            hidden_dim=saved_cpt["model_arch"]["hidden_dim"],
-        ).to(device)
+        if architecture == "FeatureAlignedPolicy":
+            policy = FeatureAlignedPolicy(
+                input_dim=saved_cpt["model_arch"]["input_dim"],
+                action_dim=saved_cpt["action_dim"],
+                hidden_dim=saved_cpt["model_arch"]["hidden_dim"],
+            ).to(device)
+        else:
+            policy = NeuralNet(
+                input_dim=saved_cpt["model_arch"]["input_dim"],
+                action_dim=saved_cpt["action_dim"],
+                hidden_dim=saved_cpt["model_arch"]["hidden_dim"],
+            ).to(device)
 
         # Load the model parameters
         policy.load_state_dict(saved_cpt["parameters"])
@@ -361,5 +369,8 @@ def evaluate_policy(
     df_res = pd.DataFrame(res_dict)
     df_res["dataset"] = dataset_name
 
+    if render_sim_state:
+        return df_res, sim_state_frames
+    
     return df_res
 
