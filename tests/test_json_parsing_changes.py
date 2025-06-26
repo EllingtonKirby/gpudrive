@@ -4,7 +4,7 @@ import mediapy
 
 # Set working directory to the base directory 'gpudrive'
 working_dir = Path.cwd()
-while working_dir.name != 'GPUDrive-Fork':
+while working_dir.name != 'gpudrive':
     working_dir = working_dir.parent
     if working_dir == Path.home():
         raise FileNotFoundError("Base directory 'gpudrive' not found")
@@ -22,7 +22,7 @@ DYNAMICS_MODEL = "delta_local" # "delta_local" / "state" / "classic"
 DATA_PATH =  sys.argv[1]# Your data path
 MAX_NUM_OBJECTS = 64
 NUM_ENVS = 1
-NUM_SCENES = 1000
+NUM_SCENES = 100
 
 # Configs
 env_config = EnvConfig(dynamics_model=DYNAMICS_MODEL)

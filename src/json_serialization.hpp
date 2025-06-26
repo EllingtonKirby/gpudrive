@@ -134,75 +134,75 @@ namespace madrona_gpudrive
     void from_dom(const simdjson::dom::element &j, TrafficLightState &tl_state)
     {
         // Set number of states to the size of the state array
-        // simdjson::dom::array states = getValueOrDefault<simdjson::dom::array>(j, "state", {});
-        // simdjson::dom::array x = getValueOrDefault<simdjson::dom::array>(j, "x", {});
-        // simdjson::dom::array y = getValueOrDefault<simdjson::dom::array>(j, "y", {});
-        // simdjson::dom::array z = getValueOrDefault<simdjson::dom::array>(j, "z", {});
-        // simdjson::dom::array timeIndex = getValueOrDefault<simdjson::dom::array>(j, "time_index", {});
-        // simdjson::dom::array laneId = getValueOrDefault<simdjson::dom::array>(j, "lane_id", {});
-        // size_t numStates = std::max(states.size(), static_cast<size_t>(consts::kTrajectoryLength));
-        // tl_state.numStates = numStates;
-        // static const std::unordered_map<std::string_view, TLState> state_map = {
-        //             {"unknown", TLState::Unknown},
-        //             {"stop", TLState::Stop},
-        //             {"caution", TLState::Caution},
-        //             {"go", TLState::Go}
-        // };
+        simdjson::dom::array states = getValueOrDefault<simdjson::dom::array>(j, "state", {});
+        simdjson::dom::array x = getValueOrDefault<simdjson::dom::array>(j, "x", {});
+        simdjson::dom::array y = getValueOrDefault<simdjson::dom::array>(j, "y", {});
+        simdjson::dom::array z = getValueOrDefault<simdjson::dom::array>(j, "z", {});
+        simdjson::dom::array timeIndex = getValueOrDefault<simdjson::dom::array>(j, "time_index", {});
+        simdjson::dom::array laneId = getValueOrDefault<simdjson::dom::array>(j, "lane_id", {});
+        size_t numStates = std::max(states.size(), static_cast<size_t>(consts::kTrajectoryLength));
+        tl_state.numStates = numStates;
+        static const std::unordered_map<std::string_view, TLState> state_map = {
+                    {"unknown", TLState::Unknown},
+                    {"stop", TLState::Stop},
+                    {"caution", TLState::Caution},
+                    {"go", TLState::Go}
+        };
 
         // Process each timestep
-        // for (size_t t = 0; t < numStates; t++) {
-        //     // Get the state string and convert to enum
-        //     if (t < states.size()) {
-        //         std::string_view state_str = getValueOrDefault<std::string_view>(states, t, "unknown");
-        //         auto it = state_map.find(state_str);
-        //         TLState enum_state = (it != state_map.end()) ? it->second : TLState::Unknown;  // ADD THIS LINE
-        //         tl_state.state[t] = static_cast<float>(enum_state);  // Cast enum to float
-        //     } else {
-        //         tl_state.state[t] = static_cast<float>(TLState::Unknown);  // Cast enum to float
-        //     }
+        for (size_t t = 0; t < numStates; t++) {
+            // Get the state string and convert to enum
+            if (t < states.size()) {
+                std::string_view state_str = getValueOrDefault<std::string_view>(states, t, "unknown");
+                auto it = state_map.find(state_str);
+                TLState enum_state = (it != state_map.end()) ? it->second : TLState::Unknown;  // ADD THIS LINE
+                tl_state.state[t] = static_cast<float>(enum_state);  // Cast enum to float
+            } else {
+                tl_state.state[t] = static_cast<float>(TLState::Unknown);  // Cast enum to float
+            }
 
-        //     // Get the x,y,z positions in a more interpretable fashion
-        //     if(x.size() > 0)
-        //     {
-        //         tl_state.x[t] = getValueOrDefault<float>(x, 0, 0.0f);
-        //     }
-        //     else
-        //     {
-        //         tl_state.x[t] = -1000.0f;
-        //     }
-        //     if(y.size() > 0)
-        //     {
-        //         tl_state.y[t] = getValueOrDefault<float>(y, 0, 0.0f);
-        //     }
-        //     else
-        //     {
-        //         tl_state.y[t] = -1000.0f;
-        //     }
-        //     if(z.size() > 0)
-        //     {
-        //         tl_state.z[t] = getValueOrDefault<float>(z, 0, 0.0f);
-        //     }
-        //     else
-        //     {
-        //         tl_state.z[t] = -1000.0f;
-        //     }
+            // Get the x,y,z positions in a more interpretable fashion
+            if(x.size() > 0)
+            {
+                tl_state.x[t] = getValueOrDefault<float>(x, 0, 0.0f);
+            }
+            else
+            {
+                tl_state.x[t] = -1000.0f;
+            }
+            if(y.size() > 0)
+            {
+                tl_state.y[t] = getValueOrDefault<float>(y, 0, 0.0f);
+            }
+            else
+            {
+                tl_state.y[t] = -1000.0f;
+            }
+            if(z.size() > 0)
+            {
+                tl_state.z[t] = getValueOrDefault<float>(z, 0, 0.0f);
+            }
+            else
+            {
+                tl_state.z[t] = -1000.0f;
+            }
 
-        //     // Get time index and lane id
-        //     if (t < timeIndex.size()) {
-        //         tl_state.timeIndex[t] = getValueOrDefault<float>(timeIndex, t, 0.0f);
-        //     } else {
-        //         tl_state.timeIndex[t] = -1;
-        //     }
-        // }
+            // Get time index and lane id
+            if (t < timeIndex.size()) {
+                tl_state.timeIndex[t] = getValueOrDefault<float>(timeIndex, t, 0.0f);
+            } else {
+                tl_state.timeIndex[t] = -1;
+            }
+        }
 
-        // if (laneId.size() > 0) {
-        //     tl_state.laneId = getValueOrDefault<int>(laneId, 0, 0);
-        // }
-        // // Fill any remaining timesteps with default values
-        // for (size_t t = numStates; t < consts::kTrajectoryLength; t++) {
-        //     tl_state.state[t] = static_cast<float>(TLState::Unknown);
-        //     tl_state.timeIndex[t] = -1;
-        // }
+        if (laneId.size() > 0) {
+            tl_state.laneId = getValueOrDefault<int>(laneId, 0, 0);
+        }
+        // Fill any remaining timesteps with default values
+        for (size_t t = numStates; t < consts::kTrajectoryLength; t++) {
+            tl_state.state[t] = static_cast<float>(TLState::Unknown);
+            tl_state.timeIndex[t] = -1;
+        }
     }
 
     void from_dom(const simdjson::dom::element &j, MapVector2 &p) {
